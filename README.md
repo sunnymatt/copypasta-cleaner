@@ -11,3 +11,6 @@ Clone the repo and then run `pip install -r requirements.txt`
 - Call from command line (improve workflow)
 - Throw onto a website
 - Just use one dictionary (currently it uses two different wordsets)
+
+## Some acknowledgments
+I use the [English words repo](https://github.com/dwyl/english-words) for one dictionary and [pyspellchecker](https://github.com/barrust/pyspellchecker) for another.
