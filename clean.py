@@ -151,7 +151,9 @@ def correct_spelling(text, sym_spell):
         input_word = token[term.start():term.end()] 
         suggestions = sym_spell.lookup(input_word, Verbosity.CLOSEST, max_edit_distance=1, transfer_casing=True)
         if len(suggestions) == 0:
-            corrected_text += token
+            # if no possible misspellings, then we assume that the word actually needs to be segmented
+            corrected_term = sym_spell.word_segmentation(input_word).corrected_string
+            corrected_text += corrected_term
             continue
 
         corrected_term = refine_correction(input_word, suggestions[0].term)
