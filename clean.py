@@ -20,11 +20,20 @@ def remove_spaces_around_linebreak(text):
     # [^\S\n] = non-newline spaces
     return re.sub(r'[^\S\n]*\n+[^\S\n]*', '\n', text)
 
+def remove_punctuation(line):
+    """
+    Remove all non whitespace/alphanumeric
+    characters from the line.
+    """
+    allowed = [c for c in line if c.isalnum() or c.isspace()]
+    return "".join(allowed)
+
 def lastword(line):
     """
     Extract last word from line
     """
-    lastword = re.search(r'\s(\w+)\s*$', line)
+    clean_line = remove_punctuation(line)
+    lastword = re.search(r'\s*(\w+)\s*$', clean_line)
     if lastword:
         return lastword.group(1)
     return ''
@@ -33,7 +42,8 @@ def firstword(line):
     """
     Extract first word from line
     """
-    firstword = re.search(r'^\s*(\w+)', line)
+    clean_line = remove_punctuation(line)
+    firstword = re.search(r'^\s*(\w+)', clean_line)
     if firstword:
         return firstword.group(1)
     return ''
@@ -89,7 +99,7 @@ def remove_line_break(text, wordset):
                 lines[i] = first_line + last_tok + to_append
                 lines[i+1] = rest_of_line
                 sub_char = '' # no character substitution needed
-                
+
         elif re.match('[.?!"”’\']', lastchar):
             # keep the line break if the length of this line
             # is much shorter than the next (rough heuristic for
@@ -140,7 +150,7 @@ def correct_spelling(text, sym_spell):
         # add everything in between the words
         corrected_text += text[last_match_index:match.start()]
         last_match_index = match.end()
-        
+
         # correct word
         token = text[match.start():match.end()]
         term = re.search(r'(\w+)', token) # extract just the term (e.g., "cat" in "cat's")
@@ -148,7 +158,7 @@ def correct_spelling(text, sym_spell):
             corrected_text += token
             continue
 
-        input_word = token[term.start():term.end()] 
+        input_word = token[term.start():term.end()]
         suggestions = sym_spell.lookup(input_word, Verbosity.CLOSEST, max_edit_distance=1, transfer_casing=True)
         if len(suggestions) == 0:
             # if no possible misspellings, then we assume that the word actually needs to be segmented
