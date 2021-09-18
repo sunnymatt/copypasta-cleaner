@@ -116,6 +116,29 @@ def remove_line_break(text, wordset):
 
     return new_text
 
+def dehyphenate(text, wordset):
+    """
+    Remove hyphenated words that shouldn't be hyphenated
+    i.e., "she was a doc-tor" -> "she was a doctor"
+    """
+    corrected_text = ''
+    last_match_index = 0
+    for match in re.finditer(r'(\w+[—-]\w+)', text):
+        # add everything in between the words
+        corrected_text += text[last_match_index:match.start()]
+        last_match_index = match.end()
+        token = text[match.start():match.end()]
+        loc = re.search(r'[—-]', token).start()
+        # remove hyphen
+        first_half, end_half = token[:loc], token[loc+1:]
+        if form_word(first_half, end_half, wordset):
+            corrected_text += first_half + end_half
+        else:
+            corrected_text += token
+    # don't forget rest of the text
+    corrected_text += text[last_match_index:]
+    return corrected_text
+
 
 def clean(text, wordset):
     """
@@ -128,6 +151,10 @@ def clean(text, wordset):
 
     # step 2: dedup line breaks
     clean_text = remove_line_break(clean_text, wordset)
+
+    # step 3: combine remaining hyphenated terms that should be one word
+    clean_text = dehyphenate(clean_text, wordset)
+
     return clean_text
 
 def refine_correction(old_word, corrected_word):
